@@ -14,11 +14,13 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api",authRoute)
 app.use("/api/property",propertyRoute)
 
+const PORT = process.env.PORT || 5000;
+
 connectDB().then(() => {
-  app.listen(process.env.PORT, (err) => {
+  app.listen(PORT, (err) => {
     if (err) {
       console.log(err);
     }
-    console.log(`Sever Listening on PORT ${process.env.PORT}`);
+    console.log(`Sever Listening on PORT ${PORT}`);
   });
 });
