@@ -2,16 +2,6 @@ import bcrypt from 'bcryptjs'
 import { User } from '../models/user-model.js';
 import jwt from "jsonwebtoken";
 
-export const Home = async (req, res) => {
-  try {
-    console.log("Hello")
-    res.status(200).send("Welcome to Hello World Home");
-  } catch (error) {
-    console.error("Home error", error);
-    res.status(500).json({ msg: "Internal Server Error" });
-  }
-};
-
 
 
 export const register = async (req, res) => {
@@ -53,9 +43,12 @@ export const login = async (req, res) => {
       return res.status(400).json({ msg: "Invalid Credentials" });
     }
 
-    const saltRound = 10;
-    const user = await bcrypt.hash(password, saltRound);   
-    if (user) {
+    
+    const isPasswordMatch = await bcrypt.compare(password, userExist.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ msg: "Invalid Credentials" });
+    }
+    if (isPasswordMatch) {
       res.status(200).json({
         msg: "Login Successfully",
         token: await userExist.generateToken(),
