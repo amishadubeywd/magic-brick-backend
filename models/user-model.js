@@ -20,9 +20,16 @@ const userSchema = new mongoose.Schema({
     require: true,
   },
   purchaseRequests: [
-    { type: mongoose.Schema.Types.ObjectId,
-     ref: "Property"
-    }
+    {
+      propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
+      title: { type: String },
+      address: { type: String, },
+      landmark: { type: String, },
+      pincode: { type: String, },
+      mobile: { type: String,  },
+      price: { type: Number, },
+      image: { type: String, },
+    },
   ], 
 });
 

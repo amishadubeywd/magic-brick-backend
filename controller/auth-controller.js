@@ -82,3 +82,34 @@ export const getUserProfile = async (req, res) => {
     res.status(401).json({ msg: "Unauthorized" });
   }
 };
+
+
+export const purchaseRequestDeletePropertyById = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const token = req.headers.authorization.split(" ")[1]; 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); 
+
+    const user = await User.findById(decoded.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+   
+    const propertyIndex = user.purchaseRequests.findIndex(
+      (request) => request.propertyId == id
+    );
+    console.log(propertyIndex)
+    if (propertyIndex === -1) {
+      return res.status(404).json({ msg: "Property not found in purchase requests" });
+    }
+
+    user.purchaseRequests.splice(propertyIndex, 1);
+
+    await user.save();
+
+    res.status(200).json({ msg: "Property deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    res.status(500).json({ msg: "Failed to delete property" });
+  }
+};

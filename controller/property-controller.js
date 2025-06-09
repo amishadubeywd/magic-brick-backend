@@ -1,10 +1,11 @@
-import {Property} from "../models/property-model.js"
+import { Property } from "../models/property-model.js";
 import { User } from "../models/user-model.js";
 
 export const UploadData = async (req, res) => {
- try {
-    const { userId, title, address, landmark, pincode, price, mobile } = req.body;
-    const image = req.file ? req.file.path : null; 
+  try {
+    const { userId, title, address, landmark, pincode, price, mobile } =
+      req.body;
+    const image = req.file ? req.file.path : null;
 
     const newProperty = await Property.create({
       userId,
@@ -24,18 +25,18 @@ export const UploadData = async (req, res) => {
     console.error("UploadData error", error);
     res.status(500).json({ msg: "Internal Server Error" });
   }
-};  
+};
 
-export const fetchData = async (req, res)=>{
-    try {
-        const data = await Property.find();
-        console.log(data);
-        res.status(201).json({msg:"data fetched successfully", property: data})
-    } catch (error) {
-        console.error("Fetched data Error", error);
-        res.status(500).json({ msg: "Internal Server Error" });
-    }
-}
+export const fetchData = async (req, res) => {
+  try {
+    const data = await Property.find();
+    console.log(data);
+    res.status(201).json({ msg: "data fetched successfully", property: data });
+  } catch (error) {
+    console.error("Fetched data Error", error);
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
 
 export const getUserProperties = async (req, res) => {
   try {
@@ -63,11 +64,27 @@ export const savePurchaseRequest = async (req, res) => {
     if (!property) {
       return res.status(404).json({ msg: "Property not found" });
     }
+    console.log("property",property)
+    
+     const { title, address, landmark, pincode, mobile, price, image } = property;
+    if (!title || !address || !landmark || !pincode || !mobile || !price || !image) {
+      return res.status(400).json({ msg: "All property details are required" });
+    }
+
 
     const user = await User.findById(userId);
-    user.purchaseRequests.push(propertyId);
+    user.purchaseRequests.push({
+      propertyId: property._id,
+      title,
+      address,
+      landmark,
+      pincode,
+      mobile,
+      price,
+      image,
+    });
     await user.save();
-
+    console.log("purchaseRequests", user.purchaseRequests);
     res.status(200).json({ msg: "Purchase request saved successfully" });
   } catch (error) {
     console.error("Error saving purchase request:", error);
@@ -82,16 +99,15 @@ export const getPropertyById = async (req, res) => {
     const property = await Property.findById(id);
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ msg: "Property not found" });
     }
 
     res.status(200).json({ property });
   } catch (error) {
     console.error("Error fetching property:", error);
-    res.status(500).json({ message: "Failed to fetch property" });
+    res.status(500).json({ msg: "Failed to fetch property" });
   }
 };
-
 
 export const deletePropertyById = async (req, res) => {
   try {
@@ -99,16 +115,15 @@ export const deletePropertyById = async (req, res) => {
     const property = await Property.findByIdAndDelete(id);
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ msg: "Property not found" });
     }
 
-    res.status(200).json({ message: "Property deleted successfully" });
+    res.status(200).json({ msg: "Property deleted successfully" });
   } catch (error) {
     console.error("Error deleting property:", error);
-    res.status(500).json({ message: "Failed to delete property" });
+    res.status(500).json({ msg: "Failed to delete property" });
   }
 };
-
 
 export const updatePropertyById = async (req, res) => {
   try {
@@ -117,7 +132,7 @@ export const updatePropertyById = async (req, res) => {
     // Prepare updated data
     const updatedData = { ...req.body };
     if (req.file) {
-      updatedData.image = req.file.path; // Save the file path
+      updatedData.image = req.file.path; 
     }
 
     const property = await Property.findByIdAndUpdate(id, updatedData, {
@@ -126,13 +141,16 @@ export const updatePropertyById = async (req, res) => {
     });
 
     if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+      return res.status(404).json({ msg: "Property not found" });
     }
 
-    res.status(200).json({ message: "Property updated successfully", property });
+    res
+      .status(200)
+      .json({ msg: "Property updated successfully", property });
   } catch (error) {
     console.error("Error updating property:", error);
-    res.status(500).json({ message: "Failed to update property" });
+    res.status(500).json({ msg: "Failed to update property" });
   }
 };
+
 
